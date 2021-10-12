@@ -2,13 +2,14 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import pygame
 
 # Constants
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
 main_engine_thrust: float = 45000.0                    # Thrust of main engine in newtons.
 sub_engine_thrust: float = 10000.0                     # Thrust of sub engines in newtons.
 engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
-specific_impulse: float = 30000.0                      # Ns/kg. Engine efficiency.
+specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
 
 
 class LanderClass:
@@ -65,13 +66,13 @@ class LanderClass:
         self.x += self.vx * dt
         # y axis movement.
         ay = self.Fy / self.total_mass()
-        self.vz += ay * dt
-        self.z += self.vz * dt
+        self.vy += ay * dt
+        self.y += self.vy * dt
         # z axis movement.
         az = self.Fz / self.total_mass() + moon_g
         self.vz += az * dt
         self.z += self.vz * dt
-        print(self.z, self.vz, az, dt, self.fuel)
+        #print(self.z, self.vz, az, dt, self.fuel)
 
 
 def game_loop():
@@ -85,16 +86,37 @@ def game_loop():
     ax = fig.add_subplot()
     times, heights = [], []
 
+    # Initialse PyGame and create window.
+    pygame.init()
+    screen_width, screen_height = 800, 800
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    background = pygame.Surface((screen_width, screen_height))
+    moon_surface = pygame.image.load("moon.png").convert()
+    background.blit(moon_surface, (0, 0))
+    pygame.draw.rect(background, pygame.Color(100, 0, 0), pygame.Rect((100, 100, 30, 20)))
+    screen.blit(background, (0, 0))
+    def render():
+        screen.blit(background, (0, 0))
+
+
+
     # Main game loop
-    while time_elapsed < 8.0:
+    while True:
         time_elapsed = time.monotonic() - starttime
         lander.physics_tick()
         times.append(time_elapsed)
         heights.append(lander.z)
+        render()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
 
-    # Plot graph of what happended. For development.
-    line1, = ax.plot(times, heights, "r")
-    plt.show()
+        if lander.z <= 0.0:
+            print(f"Landed at {lander.total_velocity()} m/s after {time_elapsed} seconds.")
+            # Plot graph of what happended. For development.
+            ax.plot(times, heights, "r")
+            plt.savefig("testplot.pdf")
+            break
 
 
 if __name__ == "__main__":
