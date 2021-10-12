@@ -1,0 +1,4 @@
+# Dependencies of this program. Install them with "pip install -r requirements.txt"
+numpy
+pygame
+matplotlib
