@@ -4,37 +4,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Constants
-moon_g = -1.625  # Acceleration due to gravity on the moon.
-main_engine_thrust = 45000  # Thrust of main engine in newtons.
-sub_engine_thrust = 10000  # Thrust of sub engines in newtons.
-engine_min_throttle = 0.2  # Level down to which the engine can throttle (0-1)
-specific_impulse = 3000  # Ns/kg. Engine efficiency.
+moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
+main_engine_thrust: float = 45000.0                    # Thrust of main engine in newtons.
+sub_engine_thrust: float = 10000.0                     # Thrust of sub engines in newtons.
+engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
+specific_impulse: float = 30000.0                      # Ns/kg. Engine efficiency.
 
 
 class LanderClass:
     def __init__(self):
-        self.fuel = 10000.0                     # mass of fuel in kg
-        self.mass = 1000.0                      # Mass of lander in kg
-        self.x = 0.0                            # x position in metres
-        self.vx = 0.0                           # x velocity in metres per second
-        self.ax = 0.0                           # x acceleration in ms^-2
-        self.Fx = 0.0                           # x component of force in newtons
-        self.y = 0.0                            # y position in metres
-        self.vy = 0.0                           # y velocity in metres per second
-        self.ay = 0.0                           # y acceleration in ms^-2
-        self.Fy = 0.0                           # y component of force in newtons
-        # height above the moon's surface.
-        self.z = 100.0
-        self.vz = 0.0                           # z velocity in metres per second
-        self.az = 0.0                           # z acceleration in ms^-2
-        self.Fz = 0.0                           # Thrust of engine.
-        self.last_tick = time.monotonic()       # Time of last physics update.
-        # portion of maximum for x engine's thrust.
-        self.thruster_throttle_x = 0.0
-        # portion of maximum for y engine's thrust.
-        self.thruster_throttle_y = 0.0
-        # portion of maximum for z engine's thrust.
-        self.thruster_throttle_z = 0.0
+        self.fuel: float = 10000.0                     # mass of fuel in kg
+        self.mass: float = 1000.0                      # Mass of lander in kg
+        self.x: float = 0.0                            # x position in metres
+        self.vx: float = 0.0                           # x velocity in metres per second
+        self.ax: float = 0.0                           # x acceleration in ms^-2
+        self.Fx: float = 0.0                           # x component of force in newtons
+        self.y: float = 0.0                            # y position in metres
+        self.vy: float = 0.0                           # y velocity in metres per second
+        self.ay: float = 0.0                           # y acceleration in ms^-2
+        self.Fy: float = 0.0                           # y component of force in newtons
+        self.z: float = 100.0                          # height above the moon's surface.
+        self.vz: float = 0.0                           # z velocity in metres per second
+        self.az: float = 0.0                           # z acceleration in ms^-2
+        self.Fz: float = 0.0                           # Thrust of engine.
+        self.last_tick = time.monotonic()              # Time of last physics update.
+        self.thruster_throttle_x: float = 0.0          # portion of maximum for x engine's thrust.
+        self.thruster_throttle_y: float = 0.0          # portion of maximum for y engine's thrust.
+        self.thruster_throttle_z: float = 0.0          # portion of maximum for z engine's thrust.
 
     def total_mass(self):
         return self.mass + self.fuel
