@@ -34,12 +34,21 @@ class LanderClass:
         self.thruster_throttle_z: float = 0.0          # portion of maximum for z engine's thrust.
 
     def total_mass(self):
+        """
+        Returns the total mass of the lander, including consumables.
+        """
         return self.mass + self.fuel
 
     def total_velocity(self):
+        """
+        Returns the total velocity of the lander, taking into account all components.
+        """
         return np.sqrt(np.square(self.vx) + np.square(self.vy) + np.square(self.vz))
 
     def physics_tick(self):
+        """
+        Computes the dynamics changes since the last tick.
+        """
         # Calculate dt
         now = time.monotonic()
         dt = now - self.last_tick
@@ -73,9 +82,25 @@ class LanderClass:
         self.vz += az * dt
         self.z += self.vz * dt
         #print(self.z, self.vz, az, dt, self.fuel)
+    
+    def zoom_moon(self, moon_surface, screen_size):
+        """
+        Function to zoom the background surface to the correct level.
+        """
+        # Prevents the view section from going negative.
+        if self.z >= 1:
+            subsection_size = self.z / 100 * moon_surface.get_width()
+        else:
+            subsection_size = 1 / 100 * moon_surface.get_width()
+        subsection_pos = (self.x, self.y)
+        subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size))
+        print(subsection_rect)
+        moon_subsurface = moon_surface.subsurface(subsection_rect)
+        scaled_background = pygame.transform.scale(moon_subsurface, (0,0))
+        return scaled_background
 
 
-def game_loop():
+def main():
     # Setting up things.
     lander = LanderClass()
     starttime = time.monotonic()
@@ -86,20 +111,18 @@ def game_loop():
     ax = fig.add_subplot()
     times, heights = [], []
 
-    # Initialse PyGame and create window.
+    # Initialise PyGame and create window.
     pygame.init()
-    screen_width, screen_height = 800, 800
-    screen = pygame.display.set_mode((screen_width, screen_height))
-    background = pygame.Surface((screen_width, screen_height))
+    screen_size = (800, 800)
+    screen = pygame.display.set_mode(screen_size)
     moon_surface = pygame.image.load("moon.png").convert()
-    background.blit(moon_surface, (0, 0))
-    pygame.draw.rect(background, pygame.Color(100, 0, 0), pygame.Rect((100, 100, 30, 20)))
-    screen.blit(background, (0, 0))
+    background = pygame.Surface(screen_size)
+
     def render():
-        screen.blit(background, (0, 0))
-
-
-
+        screen.blit(lander.zoom_moon(moon_surface, screen_size), (0, 0))
+        pygame.display.flip()
+        pygame.time.wait(500)
+    
     # Main game loop
     while True:
         time_elapsed = time.monotonic() - starttime
@@ -112,7 +135,11 @@ def game_loop():
                 quit()
 
         if lander.z <= 0.0:
-            print(f"Landed at {lander.total_velocity()} m/s after {time_elapsed} seconds.")
+            print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
+            if lander.total_velocity <= 1:
+                print("The landing was successful.")
+            else:
+                print("You crashed!\nKABOOM!")
             # Plot graph of what happended. For development.
             ax.plot(times, heights, "r")
             plt.savefig("testplot.pdf")
@@ -120,5 +147,5 @@ def game_loop():
 
 
 if __name__ == "__main__":
-    game_loop()
+    main()
     exit(0)
