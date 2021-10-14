@@ -3,6 +3,8 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import pygame
+from pygame import key
+from pygame.constants import K_UP
 
 # Constants
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
@@ -32,6 +34,19 @@ class LanderClass:
         self.thruster_throttle_x: float = 0.0          # portion of maximum for x engine's thrust.
         self.thruster_throttle_y: float = 0.0          # portion of maximum for y engine's thrust.
         self.thruster_throttle_z: float = 0.0          # portion of maximum for z engine's thrust.
+    
+    def throttle(self, increasing):
+        now = time.monotonic()
+        dt = now - self.last_tick
+        if increasing:
+            self.thruster_throttle_z += dt * 1.0
+        else:
+            self.thruster_throttle_z -+ dt * 1.0
+        # Check that the throttle is set to a reasonable amount.
+        if self.thruster_throttle_z >= 1:
+            self.thruster_throttle_z = 1.0
+        elif self.thruster_throttle_z <= 0.0:
+            self.thruster_throttle_z = 0.0
 
     def total_mass(self):
         """
@@ -120,14 +135,37 @@ def main():
     screen.blit(background, (0, 0))
 
     def render():
+        """
+        Updates the screen with the current situation.
+        """
         background = lander.zoom_moon(moon_surface, screen_size)
         screen.blit(background, (0, 0))
         pygame.display.flip()
         #pygame.time.wait(500)
+
+    def check_keys():
+        """
+        Checks to see if any keys are pressed and causes their effects.
+        """
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            lander.throttle(True)
+        elif keys[pygame.K_c]:
+            lander.throttle(False)
+        if keys[pygame.K_UP]:
+            lander.thruster_throttle_x = 1.0
+        else:
+            lander.thruster_throttle_x = 0.0
+        if keys[pygame.K_DOWN]:
+            lander.thruster_throttle_x = -1.0
+        else:
+            lander.thruster_throttle_x = 0.0
     
     # Main game loop
     while True:
         time_elapsed = time.monotonic() - starttime
+
+        check_keys()
         lander.physics_tick()
 
         times.append(time_elapsed)
