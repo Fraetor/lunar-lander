@@ -96,7 +96,7 @@ class LanderClass:
         subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size))
         print(subsection_rect)
         moon_subsurface = moon_surface.subsurface(subsection_rect)
-        scaled_background = pygame.transform.scale(moon_subsurface, (0,0))
+        scaled_background = pygame.transform.scale(moon_subsurface, screen_size)
         return scaled_background
 
 
