@@ -136,7 +136,7 @@ def main():
 
         if lander.z <= 0.0:
             print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
-            if lander.total_velocity <= 1:
+            if lander.total_velocity() <= 1:
                 print("The landing was successful.")
             else:
                 print("You crashed!\nKABOOM!")
