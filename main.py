@@ -105,21 +105,23 @@ def main():
     lander = LanderClass()
     starttime = time.monotonic()
     time_elapsed = 0.0
-
-    # Create graph to display descent.
-    fig = plt.figure("lander_graph")
-    ax = fig.add_subplot()
+    
+    # Used for plotting the graphs at the end.
     times, heights = [], []
 
     # Initialise PyGame and create window.
     pygame.init()
     screen_size = (800, 800)
+    # pygame.display.set_icon(Surface)
+    pygame.display.set_caption("Lunar Lander")
     screen = pygame.display.set_mode(screen_size)
     moon_surface = pygame.image.load("moon.png").convert()
     background = pygame.Surface(screen_size)
+    screen.blit(background, (0, 0))
 
     def render():
-        screen.blit(lander.zoom_moon(moon_surface, screen_size), (0, 0))
+        background = lander.zoom_moon(moon_surface, screen_size)
+        screen.blit(background, (0, 0))
         pygame.display.flip()
         pygame.time.wait(500)
     
@@ -127,10 +129,13 @@ def main():
     while True:
         time_elapsed = time.monotonic() - starttime
         lander.physics_tick()
+
         times.append(time_elapsed)
         heights.append(lander.z)
+        
         render()
         for event in pygame.event.get():
+            # Makes the close button work.
             if event.type == pygame.QUIT:
                 quit()
 
@@ -140,7 +145,10 @@ def main():
                 print("The landing was successful.")
             else:
                 print("You crashed!\nKABOOM!")
-            # Plot graph of what happended. For development.
+            # Plot graph of what happended. For display at the end.
+            # Create graph to display descent.
+            fig = plt.figure("lander_graph")
+            ax = fig.add_subplot()
             ax.plot(times, heights, "r")
             plt.savefig("testplot.pdf")
             break
