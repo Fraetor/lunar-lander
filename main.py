@@ -16,11 +16,11 @@ class LanderClass:
     def __init__(self):
         self.fuel: float = 10000.0                     # mass of fuel in kg
         self.mass: float = 1000.0                      # Mass of lander in kg
-        self.x: float = 0.0                            # x position in metres
+        self.x: float = 2500.0                            # x position in metres
         self.vx: float = 0.0                           # x velocity in metres per second
         self.ax: float = 0.0                           # x acceleration in ms^-2
         self.Fx: float = 0.0                           # x component of force in newtons
-        self.y: float = 0.0                            # y position in metres
+        self.y: float = 2500.0                            # y position in metres
         self.vy: float = 0.0                           # y velocity in metres per second
         self.ay: float = 0.0                           # y acceleration in ms^-2
         self.Fy: float = 0.0                           # y component of force in newtons
@@ -92,7 +92,7 @@ class LanderClass:
             subsection_size = self.z / 100 * moon_surface.get_width()
         else:
             subsection_size = 1 / 100 * moon_surface.get_width()
-        subsection_pos = (self.x, self.y)
+        subsection_pos = (self.x - subsection_size/2, self.y - subsection_size/2)
         subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size))
         print(subsection_rect)
         moon_subsurface = moon_surface.subsurface(subsection_rect)
@@ -123,7 +123,7 @@ def main():
         background = lander.zoom_moon(moon_surface, screen_size)
         screen.blit(background, (0, 0))
         pygame.display.flip()
-        pygame.time.wait(500)
+        #pygame.time.wait(500)
     
     # Main game loop
     while True:
