@@ -133,3 +133,5 @@ dmypy.json
 
 # File to test out snippets.
 test.py
+# Test plot of graphics.
+testplot.pdf
