@@ -10,7 +10,7 @@ main_engine_thrust: float = 45000.0                    # Thrust of main engine i
 sub_engine_thrust: float = 45000.0                     # Thrust of sub engines in newtons.
 engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
-throttle_rate: float = 0.5                             # Rate of throttle changing in full throttles per second.
+throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
 
 class LanderClass:
     def __init__(self):
