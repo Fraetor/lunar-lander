@@ -3,6 +3,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import pygame
+from pygame.constants import QUIT, K_z
 
 # Constants
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
@@ -11,6 +12,7 @@ sub_engine_thrust: float = 45000.0                     # Thrust of sub engines i
 engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
 throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
+starting_height: float = 100.0                         # Height above the surface that the lander starts.
 
 class LanderClass:
     def __init__(self):
@@ -24,7 +26,7 @@ class LanderClass:
         self.vy: float = 0.0                           # y velocity in metres per second
         self.ay: float = 0.0                           # y acceleration in ms^-2
         self.Fy: float = 0.0                           # y component of force in newtons
-        self.z: float = 100.0                          # height above the moon's surface.
+        self.z: float = starting_height                # height above the moon's surface.
         self.vz: float = 0.0                           # z velocity in metres per second
         self.az: float = 0.0                           # z acceleration in ms^-2
         self.Fz: float = 0.0                           # Thrust of engine.
@@ -101,17 +103,38 @@ class LanderClass:
         self.z += self.vz * dt
         #print(self.z, self.vz, az, dt, self.fuel)
     
+    def bounds_check(self):
+        """
+        Ensures the lander doesn't leave the background area and crash the program.
+        """
+        # Ensures the lander doesn't go too high.
+        if self.z > starting_height:
+            self.z = starting_height
+            # Ensures you actually come back down, rather than being stuck at the top.
+            if self.vz > 2.0:
+                self.vz = 1.0
+        # Ensures the lander doesn't go too far to the sides.
+        if self.x > 4950:
+            self.x = 4950
+        elif self.x < 50:
+            self.x = 50
+        # Ensures the lander doesn't go too far to the top or bottom.
+        if self.y > 4950:
+            self.y = 4950
+        elif self.y < 50:
+            self.y = 50
+    
     def zoom_moon(self, moon_surface, screen_size):
         """
         Function to zoom the background surface to the correct level.
         """
         # Prevents the view section from going negative.
         if self.z >= 1:
-            subsection_size = self.z / 100 * moon_surface.get_width()
+            subsection_size = self.z / starting_height * moon_surface.get_width()
         else:
-            subsection_size = 1 / 100 * moon_surface.get_width()
+            subsection_size = 1 / starting_height * moon_surface.get_width()
         subsection_pos = (self.x - subsection_size/2, self.y - subsection_size/2)
-        subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size))
+        subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size)).clip(moon_surface.get_rect())
         #print(subsection_rect)
         moon_subsurface = moon_surface.subsurface(subsection_rect)
         scaled_background = pygame.transform.scale(moon_subsurface, screen_size)
@@ -125,7 +148,7 @@ def main():
     time_elapsed = 0.0
     
     # Used for plotting the graphs at the end.
-    times, heights = [], []
+    times, heights, velocities = [], [], []
 
     # Initialise PyGame and create window.
     pygame.init()
@@ -137,6 +160,7 @@ def main():
     background = pygame.Surface(screen_size)
     screen.blit(background, (0, 0))
 
+
     def render():
         """
         Updates the screen with the current situation.
@@ -144,7 +168,7 @@ def main():
         background = lander.zoom_moon(moon_surface, screen_size)
         screen.blit(background, (0, 0))
         pygame.display.flip()
-        #pygame.time.wait(500)
+    
 
     def check_keys():
         """
@@ -156,51 +180,95 @@ def main():
             lander.throttle_up()
         elif keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
             lander.throttle_down()
-        # x axis subthrusters
+        # Maximum/zero thrust shortcuts.
+        if keys[pygame.K_x]:
+            lander.thruster_throttle_z = 1.0
+        elif keys[pygame.K_z]:
+            lander.thruster_throttle_z = 0.0
+        # x axis subthrusters (left/right)
         if keys[pygame.K_RIGHT]:
             lander.thruster_throttle_x = 1.0
         elif keys[pygame.K_LEFT]:
             lander.thruster_throttle_x = -1.0
         else:
             lander.thruster_throttle_x = 0.0
-        # y axis subthrusters
+        # y axis subthrusters (up/down)
         if keys[pygame.K_UP]:
             lander.thruster_throttle_y = -1.0
         elif keys[pygame.K_DOWN]:
             lander.thruster_throttle_y = 1.0
         else:
             lander.thruster_throttle_y = 0.0
+        # Exit the game.
+        if keys[pygame.K_ESCAPE]:
+            quit()
     
+
+    def readouts():
+        print(f"Height: {lander.z:.2f}m Velocity: {lander.total_velocity():.2f}m/s Thrust: {lander.Fz:.2f}N Fuel: {lander.fuel:.2f}kg")
+
+    
+    def events():
+        """
+        Handles the pygame event queue.
+        """
+        for event in pygame.event.get():
+            # Makes the window close button work.
+            if event.type == pygame.QUIT:
+                quit()
+    
+
+    def gen_summary_graphs():
+        # Plot graph of what happended. For display at the end.
+        # Create graph to display descent.
+        fig = plt.figure("lander_graph")
+        ax = fig.add_subplot()
+        ax.plot(times, heights, "r")
+        plt.savefig("height.pdf")
+    
+
+    def startup_screen():
+        # A screen with instructions and such that is displayed before the game starts.
+        pass # Not yet implimented.
+
+
+    def ending_screen():
+        print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
+        if lander.total_velocity() <= 1:
+            print("The landing was successful.")
+        else:
+            print("You crashed!\nKABOOM!")
+        # Generate summary graphs of the flight.
+        gen_summary_graphs()
+        # Display an ending screen with the graphs embedded.
+        pass # Not yet implimented.
+
+
+    startup_screen()
+
     # Main game loop
     while True:
         time_elapsed = time.monotonic() - starttime
 
-        check_keys()
-        lander.physics_tick()
-
         times.append(time_elapsed)
         heights.append(lander.z)
-        print(lander.Fz)
+        velocities.append(lander.total_velocity())
 
+        check_keys()
+        lander.physics_tick()
+        lander.bounds_check()
+        readouts()
         render()
-        for event in pygame.event.get():
-            # Makes the close button work.
-            if event.type == pygame.QUIT:
-                quit()
+        events()
 
+        # Break out of loop once we have landed/hit the ground.
         if lander.z <= 0.0:
-            print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
-            if lander.total_velocity() <= 1:
-                print("The landing was successful.")
-            else:
-                print("You crashed!\nKABOOM!")
-            # Plot graph of what happended. For display at the end.
-            # Create graph to display descent.
-            fig = plt.figure("lander_graph")
-            ax = fig.add_subplot()
-            ax.plot(times, heights, "r")
-            plt.savefig("testplot.pdf")
             break
+    
+    ending_screen()
+
+
+
 
 
 if __name__ == "__main__":
