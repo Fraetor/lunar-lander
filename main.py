@@ -9,20 +9,20 @@ from pygame.constants import K_UP
 # Constants
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
 main_engine_thrust: float = 45000.0                    # Thrust of main engine in newtons.
-sub_engine_thrust: float = 10000.0                     # Thrust of sub engines in newtons.
+sub_engine_thrust: float = 45000.0                     # Thrust of sub engines in newtons.
 engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
-
+throttle_rate: float = 0.5                             # Rate of throttle changing in full throttles per second.
 
 class LanderClass:
     def __init__(self):
         self.fuel: float = 10000.0                     # mass of fuel in kg
         self.mass: float = 1000.0                      # Mass of lander in kg
-        self.x: float = 2500.0                            # x position in metres
+        self.x: float = 2500.0                         # x position in metres
         self.vx: float = 0.0                           # x velocity in metres per second
         self.ax: float = 0.0                           # x acceleration in ms^-2
         self.Fx: float = 0.0                           # x component of force in newtons
-        self.y: float = 2500.0                            # y position in metres
+        self.y: float = 2500.0                         # y position in metres
         self.vy: float = 0.0                           # y velocity in metres per second
         self.ay: float = 0.0                           # y acceleration in ms^-2
         self.Fy: float = 0.0                           # y component of force in newtons
@@ -35,19 +35,24 @@ class LanderClass:
         self.thruster_throttle_y: float = 0.0          # portion of maximum for y engine's thrust.
         self.thruster_throttle_z: float = 0.0          # portion of maximum for z engine's thrust.
     
-    def throttle(self, increasing):
+    def throttle_up(self):
         now = time.monotonic()
         dt = now - self.last_tick
-        if increasing:
-            self.thruster_throttle_z += dt * 1.0
-        else:
-            self.thruster_throttle_z -+ dt * 1.0
+        self.thruster_throttle_z += dt * throttle_rate
         # Check that the throttle is set to a reasonable amount.
         if self.thruster_throttle_z >= 1:
             self.thruster_throttle_z = 1.0
-        elif self.thruster_throttle_z <= 0.0:
+        elif self.thruster_throttle_z <= engine_min_throttle:
+            self.thruster_throttle_z = engine_min_throttle
+    
+    def throttle_down(self):
+        now = time.monotonic()
+        dt = now - self.last_tick
+        self.thruster_throttle_z -= dt * throttle_rate
+        if self.thruster_throttle_z <= engine_min_throttle:
             self.thruster_throttle_z = 0.0
 
+        
     def total_mass(self):
         """
         Returns the total mass of the lander, including consumables.
@@ -109,7 +114,7 @@ class LanderClass:
             subsection_size = 1 / 100 * moon_surface.get_width()
         subsection_pos = (self.x - subsection_size/2, self.y - subsection_size/2)
         subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size))
-        print(subsection_rect)
+        #print(subsection_rect)
         moon_subsurface = moon_surface.subsurface(subsection_rect)
         scaled_background = pygame.transform.scale(moon_subsurface, screen_size)
         return scaled_background
@@ -148,18 +153,25 @@ def main():
         Checks to see if any keys are pressed and causes their effects.
         """
         keys = pygame.key.get_pressed()
+        # main thruster controls.
         if keys[pygame.K_SPACE]:
-            lander.throttle(True)
-        elif keys[pygame.K_c]:
-            lander.throttle(False)
-        if keys[pygame.K_UP]:
+            lander.throttle_up()
+        elif keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            lander.throttle_down()
+        # x axis subthrusters
+        if keys[pygame.K_RIGHT]:
             lander.thruster_throttle_x = 1.0
-        else:
-            lander.thruster_throttle_x = 0.0
-        if keys[pygame.K_DOWN]:
+        elif keys[pygame.K_LEFT]:
             lander.thruster_throttle_x = -1.0
         else:
             lander.thruster_throttle_x = 0.0
+        # y axis subthrusters
+        if keys[pygame.K_UP]:
+            lander.thruster_throttle_y = -1.0
+        elif keys[pygame.K_DOWN]:
+            lander.thruster_throttle_y = 1.0
+        else:
+            lander.thruster_throttle_y = 0.0
     
     # Main game loop
     while True:
@@ -170,7 +182,8 @@ def main():
 
         times.append(time_elapsed)
         heights.append(lander.z)
-        
+        print(lander.Fz)
+
         render()
         for event in pygame.event.get():
             # Makes the close button work.
