@@ -13,7 +13,7 @@ engine_min_throttle: float = 0.2                       # Level down to which the
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
 throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
 starting_height: float = 100.0                         # Height above the surface that the lander starts.
-
+safe_landing_velocity: float = 3.0                     # Save landing velocity in m/s.
 class LanderClass:
     def __init__(self):
         self.fuel: float = 10000.0                     # mass of fuel in kg
@@ -152,11 +152,17 @@ def main():
 
     # Initialise PyGame and create window.
     pygame.init()
+
+    # Size of the window.
     screen_size = (800, 800)
-    # pygame.display.set_icon(Surface)
+    
+    # Sets icon and name of the game window.
+    icon = pygame.image.load("graphics/icon.png")
+    icon.set_colorkey(pygame.Color(255, 0, 255))
+    pygame.display.set_icon(icon)
     pygame.display.set_caption("Lunar Lander")
     screen = pygame.display.set_mode(screen_size)
-    moon_surface = pygame.image.load("moon.png").convert()
+    moon_surface = pygame.image.load("graphics/moon.png").convert()
     background = pygame.Surface(screen_size)
     screen.blit(background, (0, 0))
 
@@ -224,7 +230,7 @@ def main():
         fig = plt.figure("lander_graph")
         ax = fig.add_subplot()
         ax.plot(times, heights, "r")
-        plt.savefig("height.pdf")
+        #plt.savefig("height.png")
     
 
     def startup_screen():
@@ -234,7 +240,7 @@ def main():
 
     def ending_screen():
         print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
-        if lander.total_velocity() <= 1:
+        if lander.total_velocity() <= safe_landing_velocity:
             print("The landing was successful.")
         else:
             print("You crashed!\nKABOOM!")
