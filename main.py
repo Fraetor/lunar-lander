@@ -35,6 +35,7 @@ class LanderClass:
         self.thruster_throttle_y: float = 0.0          # portion of maximum for y engine's thrust.
         self.thruster_throttle_z: float = 0.0          # portion of maximum for z engine's thrust.
     
+
     def throttle_up(self):
         now = time.monotonic()
         dt = now - self.last_tick
@@ -45,6 +46,7 @@ class LanderClass:
         elif self.thruster_throttle_z <= engine_min_throttle:
             self.thruster_throttle_z = engine_min_throttle
     
+
     def throttle_down(self):
         now = time.monotonic()
         dt = now - self.last_tick
@@ -59,11 +61,13 @@ class LanderClass:
         """
         return self.mass + self.fuel
 
+
     def total_velocity(self):
         """
         Returns the total velocity of the lander, taking into account all components.
         """
         return np.sqrt(np.square(self.vx) + np.square(self.vy) + np.square(self.vz))
+
 
     def physics_tick(self):
         """
@@ -101,8 +105,8 @@ class LanderClass:
         az = self.Fz / self.total_mass() + moon_g
         self.vz += az * dt
         self.z += self.vz * dt
-        #print(self.z, self.vz, az, dt, self.fuel)
     
+
     def bounds_check(self):
         """
         Ensures the lander doesn't leave the background area and crash the program.
@@ -124,6 +128,7 @@ class LanderClass:
         elif self.y < 50:
             self.y = 50
     
+
     def zoom_moon(self, moon_surface, screen_size):
         """
         Function to zoom the background surface to the correct level.
@@ -139,6 +144,8 @@ class LanderClass:
         moon_subsurface = moon_surface.subsurface(subsection_rect)
         scaled_background = pygame.transform.scale(moon_subsurface, screen_size)
         return scaled_background
+
+
 
 
 def main():
@@ -211,6 +218,9 @@ def main():
     
 
     def readouts():
+        """
+        Prepares readout surfaces for bliting to the screen during the render.
+        """
         print(f"Height: {lander.z:.2f}m Velocity: {lander.total_velocity():.2f}m/s Thrust: {lander.Fz:.2f}N Fuel: {lander.fuel:.2f}kg")
 
     
@@ -234,11 +244,16 @@ def main():
     
 
     def startup_screen():
-        # A screen with instructions and such that is displayed before the game starts.
+        """
+        Displays a screen with instructions and such that is displayed before the game starts.
+        """
         pass # Not yet implimented.
 
 
     def ending_screen():
+        """
+        Displays a screen after landing or crashing, displaying flight statistics, and giving the option to restart.
+        """
         print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
         if lander.total_velocity() <= safe_landing_velocity:
             print("The landing was successful.")
@@ -276,7 +291,7 @@ def main():
 
 
 
-
+# Doesn't run program if it is imported as a module.
 if __name__ == "__main__":
     main()
     exit(0)
