@@ -9,7 +9,6 @@ from pygame.constants import QUIT, K_z
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
 main_engine_thrust: float = 45000.0                    # Thrust of main engine in newtons.
 sub_engine_thrust: float = 45000.0                     # Thrust of sub engines in newtons.
-engine_min_throttle: float = 0.2                       # Level down to which the engine can throttle (0-1)
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
 throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
 starting_height: float = 100.0                         # Height above the surface that the lander starts.
@@ -37,21 +36,25 @@ class LanderClass:
     
 
     def throttle_up(self):
+        """
+        Steadily throttles up the main engine.
+        """
         now = time.monotonic()
         dt = now - self.last_tick
         self.thruster_throttle_z += dt * throttle_rate
         # Check that the throttle is set to a reasonable amount.
         if self.thruster_throttle_z >= 1:
             self.thruster_throttle_z = 1.0
-        elif self.thruster_throttle_z <= engine_min_throttle:
-            self.thruster_throttle_z = engine_min_throttle
     
 
     def throttle_down(self):
+        """
+        Steadily throttles up the main engine.
+        """
         now = time.monotonic()
         dt = now - self.last_tick
         self.thruster_throttle_z -= dt * throttle_rate
-        if self.thruster_throttle_z <= engine_min_throttle:
+        if self.thruster_throttle_z <= 0:
             self.thruster_throttle_z = 0.0
 
         
@@ -131,16 +134,16 @@ class LanderClass:
 
     def zoom_moon(self, moon_surface, screen_size):
         """
-        Function to zoom the background surface to the correct level.
+        Function to zoom and crop the background surface to the correct level for display.
         """
         # Prevents the view section from going negative.
         if self.z >= 1:
             subsection_size = self.z / starting_height * moon_surface.get_width()
         else:
             subsection_size = 1 / starting_height * moon_surface.get_width()
+        
         subsection_pos = (self.x - subsection_size/2, self.y - subsection_size/2)
         subsection_rect = pygame.Rect(subsection_pos, (subsection_size, subsection_size)).clip(moon_surface.get_rect())
-        #print(subsection_rect)
         moon_subsurface = moon_surface.subsurface(subsection_rect)
         scaled_background = pygame.transform.scale(moon_subsurface, screen_size)
         return scaled_background
