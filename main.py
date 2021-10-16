@@ -11,8 +11,13 @@ main_engine_thrust: float = 45000.0                    # Thrust of main engine i
 sub_engine_thrust: float = 45000.0                     # Thrust of sub engines in newtons.
 specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
 throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
-starting_height: float = 1000.0                         # Height above the surface that the lander starts.
+starting_height: float = 1000.0                        # Height above the surface that the lander starts.
 safe_landing_velocity: float = 3.0                     # Save landing velocity in m/s.
+target = {"x": 3400, "y": 2700}                        # Landing target. Image coordinates on the background image.
+
+
+
+
 class LanderClass:
     def __init__(self):
         self.fuel: float = 10000.0                     # mass of fuel in kg
@@ -257,7 +262,9 @@ def main():
         """
         Displays a screen after landing or crashing, displaying flight statistics, and giving the option to restart.
         """
-        print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds.")
+        # Calculate distance from target in centre of clearing.
+        distance_from_target = np.sqrt(np.square(lander.x - target["x"]) + np.square(lander.y - target["y"]))
+        print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds, {distance_from_target:.2f}m away from the target.")
         if lander.total_velocity() <= safe_landing_velocity:
             print("The landing was successful.")
         else:
