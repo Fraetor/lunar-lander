@@ -157,14 +157,6 @@ class LanderClass:
 
 
 def main():
-    # Setting up things.
-    lander = LanderClass()
-    starttime = time.monotonic()
-    time_elapsed = 0.0
-    
-    # Used for plotting the graphs at the end.
-    times, heights, velocities = [], [], []
-
     # Initialise PyGame and create window.
     pygame.init()
 
@@ -179,7 +171,6 @@ def main():
     screen = pygame.display.set_mode(screen_size)
     moon_surface = pygame.image.load("graphics/moon.png").convert()
     background = pygame.Surface(screen_size)
-    screen.blit(background, (0, 0))
 
 
     def render():
@@ -255,7 +246,20 @@ def main():
         """
         Displays a screen with instructions and such that is displayed before the game starts.
         """
-        pass # Not yet implimented.
+        startscreen = pygame.image.load("graphics/startscreen.png").convert()
+        pygame.transform.smoothscale(startscreen, screen_size, background)
+        screen.blit(background, (0, 0))
+        pygame.display.flip()
+        # Wait for the space bar to be pressed before continuing.
+        while True:
+            if pygame.key.get_pressed()[pygame.K_SPACE]:
+                break
+            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                quit()
+            # Handle events while on startup screen.
+            events()
+            # Stops this using loads of CPU time.
+            pygame.time.wait(10)
 
 
     def ending_screen():
@@ -276,6 +280,14 @@ def main():
 
 
     startup_screen()
+
+    # Setting up physics state.
+    lander = LanderClass()
+    time_elapsed = 0.0
+    starttime = time.monotonic()
+    
+    # Used for plotting the graphs at the end.
+    times, heights, velocities = [], [], []
 
     # Main game loop
     while True:
