@@ -11,3 +11,4 @@ Then run with `python3 main.py`
 - Make proper startscreen graphic.
 - Make proper endscreen graphic.
 - Impliment readout HUD.
+- Balance game (fuel, thrust and such)

@@ -267,7 +267,7 @@ def main():
 
     def ending_screen():
         """
-        Displays a screen after landing or crashing, displaying flight statistics, and giving the option to restart.
+        Displays a screen after landing or crashing, displaying flight statistics, and giving the option to restart or quit.
         """
         # Calculate distance from target in centre of clearing.
         distance_from_target = np.sqrt(np.square(lander.x - target["x"]) + np.square(lander.y - target["y"]))
