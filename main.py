@@ -271,17 +271,29 @@ def main():
         # Calculate distance from target in centre of clearing.
         distance_from_target = np.sqrt(np.square(lander.x - target["x"]) + np.square(lander.y - target["y"]))
         print(f"Landed at {lander.total_velocity():.2f} m/s after {time_elapsed:.2f} seconds, {distance_from_target:.2f}m away from the target.")
+        bigText = pygame.font.Font(None, 120)
+        smallText = pygame.font.Font(None, 40)
         if lander.total_velocity() <= safe_landing_velocity:
             print("The landing was successful.")
+            end_status = bigText.render("LANDED!", True, (255, 255, 255))
         else:
             print("You crashed!\nKABOOM!")
+            end_status = bigText.render("CRASHED!", True, (255, 255, 255))
         # Generate summary graphs of the flight.
         gen_summary_graphs()
         # Display an ending screen with the graphs embedded.
         endscreen = pygame.image.load("graphics/endscreen.png").convert()
         # Here is where we need to blit the graphs onto the endscreen.
         height_graph = pygame.image.load("__heightgraph.png").convert()
-        endscreen.blit(height_graph, pygame.Rect((200, 440), (400, 300)))
+        # Renders summary text to the screen.
+        end_speed = smallText.render(f"{lander.total_velocity():.2f}", True, (255, 255, 255))
+        end_time = smallText.render(f"{time_elapsed:.2f}", True, (255, 255, 255))
+        end_distance = smallText.render(f"{distance_from_target:.2f}", True, (255, 255, 255))
+        endscreen.blit(end_status, pygame.Rect((176, 30), (464, 160)))
+        endscreen.blit(end_speed, pygame.Rect((221, 218), (92, 40)))
+        endscreen.blit(end_time, pygame.Rect((268, 294), (92, 40)))
+        endscreen.blit(end_distance, pygame.Rect((178, 369), (92, 40)))
+        endscreen.blit(height_graph, pygame.Rect((200, 440), (92, 40)))
         pygame.transform.smoothscale(endscreen, screen_size, background)
         screen.blit(background, (0, 0))
         pygame.display.flip()
