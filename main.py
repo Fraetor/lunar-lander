@@ -3,7 +3,6 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import pygame
-from pygame.constants import QUIT, K_z
 
 # Constants
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
