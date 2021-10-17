@@ -169,14 +169,34 @@ def main():
     pygame.display.set_caption("Lunar Lander")
     screen = pygame.display.set_mode(screen_size)
     moon_surface = pygame.image.load("graphics/moon.png").convert()
+    crosshair = pygame.image.load("graphics/crosshair.png").convert()
+    crosshair.set_colorkey((255, 0, 255))
+    crosshair_pos = pygame.Rect((screen_size[0]//2 - 16, screen_size[1]//2 - 16), (32, 32))
     background = pygame.Surface(screen_size)
+    readoutText = pygame.font.Font(None, 30)
+    readout_text_colour = (255, 255, 255)
 
 
     def render():
         """
         Updates the screen with the current situation.
         """
+        # Renders moon surface.
         background = lander.zoom_moon(moon_surface, screen_size)
+        # Readouts
+        readout_height = readoutText.render(f"Height: {lander.z:.2f} m", True, readout_text_colour)
+        readout_velocity = readoutText.render(f"Speed: {lander.total_velocity():.2f} m/s", True, readout_text_colour)
+        readout_thrust = readoutText.render(f"Throttle: {lander.thruster_throttle_z*100:.0f}%", True, readout_text_colour)
+        readout_fuel = readoutText.render(f"Fuel: {lander.fuel:.2f} kg", True, readout_text_colour)
+        readout_time = readoutText.render(f"Time: {time_elapsed:.2f} s", True, readout_text_colour)
+        background.blit(readout_height, (20, 20))
+        background.blit(readout_velocity, (20, 60))
+        background.blit(readout_thrust, (20, 100))
+        background.blit(readout_fuel, (20, 140))
+        background.blit(readout_time, (20, 180))
+        # Crosshair in centre of screen.
+        background.blit(crosshair, crosshair_pos)
+        # Renders onto screen.
         screen.blit(background, (0, 0))
         pygame.display.flip()
     
@@ -214,13 +234,6 @@ def main():
         if keys[pygame.K_ESCAPE] or keys[pygame.K_q]:
             quit()
     
-
-    def readouts():
-        """
-        Prepares readout surfaces for bliting to the screen during the render.
-        """
-        print(f"Height: {lander.z:.2f}m Velocity: {lander.total_velocity():.2f}m/s Thrust: {lander.Fz:.2f}N Fuel: {lander.fuel:.2f}kg")
-
     
     def events():
         """
@@ -331,7 +344,6 @@ def main():
         check_keys()
         lander.physics_tick()
         lander.bounds_check()
-        readouts()
         render()
         events()
 
