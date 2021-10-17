@@ -212,7 +212,7 @@ def main():
         else:
             lander.thruster_throttle_y = 0.0
         # Exit the game.
-        if keys[pygame.K_ESCAPE]:
+        if keys[pygame.K_ESCAPE] or keys[pygame.K_q]:
             quit()
     
 
@@ -236,10 +236,10 @@ def main():
     def gen_summary_graphs():
         # Plot graph of what happended. For display at the end.
         # Create graph to display descent.
-        fig = plt.figure("lander_graph")
+        fig = plt.figure("lander_graph", figsize=(8,6))
         ax = fig.add_subplot()
         ax.plot(times, heights, "r")
-        #plt.savefig("height.png")
+        plt.savefig("__heightgraph.png", dpi=50)
     
 
     def startup_screen():
@@ -252,9 +252,10 @@ def main():
         pygame.display.flip()
         # Wait for the space bar to be pressed before continuing.
         while True:
-            if pygame.key.get_pressed()[pygame.K_SPACE]:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:  # Press space to start.
                 break
-            elif pygame.key.get_pressed()[pygame.K_ESCAPE]:
+            elif keys[pygame.K_ESCAPE] or keys[pygame.K_q]:  # Press escape or 'q' to quit.
                 quit()
             # Handle events while on startup screen.
             events()
@@ -276,7 +277,24 @@ def main():
         # Generate summary graphs of the flight.
         gen_summary_graphs()
         # Display an ending screen with the graphs embedded.
-        pass # Not yet implimented.
+        endscreen = pygame.image.load("graphics/endscreen.png").convert()
+        # Here is where we need to blit the graphs onto the endscreen.
+        height_graph = pygame.image.load("__heightgraph.png").convert()
+        endscreen.blit(height_graph, pygame.Rect((200, 440), (400, 300)))
+        pygame.transform.smoothscale(endscreen, screen_size, background)
+        screen.blit(background, (0, 0))
+        pygame.display.flip()
+        # Wait for the space bar to be pressed before continuing.
+        while True:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_q] or keys[pygame.K_ESCAPE]:  # Press 'q' to exit.
+                break
+            elif keys[pygame.K_r]:  # Press 'r' to restart.
+                main()
+            # Handle events while on end screen.
+            events()
+            # Stops this using loads of CPU time.
+            pygame.time.wait(10)
 
 
     startup_screen()

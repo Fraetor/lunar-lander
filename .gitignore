@@ -131,7 +131,8 @@ dmypy.json
 # VSCode
 .vscode/
 
-# File to test out snippets.
-test.py
-# Test plot of graphics.
-testplot.pdf
+# Various testing files.
+test*
+
+# Private files generated at runtime.
+__*
