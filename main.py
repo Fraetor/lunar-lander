@@ -239,6 +239,8 @@ def main():
         fig = plt.figure("lander_graph", figsize=(8,6))
         ax = fig.add_subplot()
         ax.plot(times, heights, "r")
+        plt.xlabel("Time / s")
+        plt.ylabel("Height / m")
         plt.savefig("__heightgraph.png", dpi=50)
     
 
@@ -284,7 +286,7 @@ def main():
         pygame.transform.smoothscale(endscreen, screen_size, background)
         screen.blit(background, (0, 0))
         pygame.display.flip()
-        # Wait for the space bar to be pressed before continuing.
+        # Wait for user input to be pressed before continuing.
         while True:
             keys = pygame.key.get_pressed()
             if keys[pygame.K_q] or keys[pygame.K_ESCAPE]:  # Press 'q' to exit.
