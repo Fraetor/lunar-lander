@@ -8,11 +8,11 @@ import pygame
 moon_g: float = -1.625                                 # Acceleration due to gravity on the moon.
 main_engine_thrust: float = 45000.0                    # Thrust of main engine in newtons.
 sub_engine_thrust: float = 45000.0                     # Thrust of sub engines in newtons.
-specific_impulse: float = 3000.0                       # Ns/kg. Engine efficiency.
+specific_impulse: float = 300.0                       # Ns/kg. Engine efficiency.
 throttle_rate: float = 0.2                             # Rate of throttle changing in full throttles per second.
 starting_height: float = 1000.0                        # Height above the surface that the lander starts.
 safe_landing_velocity: float = 3.0                     # Save landing velocity in m/s.
-target = {"x": 3400, "y": 2700}                        # Landing target. Image coordinates on the background image.
+target = {"x": 3393, "y": 2661}                        # Landing target. Image coordinates on the background image.
 
 
 
@@ -58,6 +58,7 @@ class LanderClass:
         now = time.monotonic()
         dt = now - self.last_tick
         self.thruster_throttle_z -= dt * throttle_rate
+        # Check that the throttle is set to a reasonable amount.
         if self.thruster_throttle_z <= 0:
             self.thruster_throttle_z = 0.0
 
