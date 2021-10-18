@@ -96,7 +96,7 @@ class LanderClass:
             self.Fx = sub_engine_thrust * self.thruster_throttle_x
             self.Fy = sub_engine_thrust * self.thruster_throttle_y
             # Fuel consumption. For each newton second of thrust use fuel.
-            self.fuel -= (self.Fz + self.Fx + self.Fy) * dt / specific_impulse
+            self.fuel -= (abs(self.Fz) + abs(self.Fx) + abs(self.Fy)) * dt / specific_impulse
         else:
             # If there is no fuel the thrust is 0.
             self.Fx, self.Fy, self.Fz = 0.0, 0.0, 0.0
